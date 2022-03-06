@@ -1,8 +1,10 @@
 package me.necroliner.socialcreditsplugin;
 
 import me.necroliner.socialcreditsplugin.commands.SCS;
-import org.bukkit.entity.Player;
+import me.necroliner.socialcreditsplugin.data.PlayersData;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Objects;
 
 public final class SocialCreditSystem extends JavaPlugin {
 
@@ -10,17 +12,22 @@ public final class SocialCreditSystem extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+        StatsDisplayManager sdManager = new StatsDisplayManager(getServer().getScoreboardManager());
         SocialCreditsManager scManager = new SocialCreditsManager(getServer().getScoreboardManager());
 
-        getServer().getPluginManager().registerEvents(new PlayerAction(scManager), this);
+        PlayersData playersData = new PlayersData();
 
-        getCommand("scs").setExecutor(new SCS(scManager));
+        getServer().getPluginManager().registerEvents(new PlayerAction(scManager, playersData), this);
+        getServer().getPluginManager().registerEvents(sdManager, this);
+
+        Objects.requireNonNull(getCommand("scs")).setExecutor(new SCS(scManager));
 
         System.out.println(SocialCreditSystem.LOGGER_NAME + "Finished plugin startup.");
     }
 
     @Override
     public void onDisable() {
-
+        System.out.println("SocialCreditSystem unloaded.");
     }
 }

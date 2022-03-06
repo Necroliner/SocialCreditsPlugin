@@ -1,32 +1,39 @@
 package me.necroliner.socialcreditsplugin;
 
 
+import me.necroliner.socialcreditsplugin.data.Datasets;
+import me.necroliner.socialcreditsplugin.data.PlayersData;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class PlayerAction implements Listener {
 
-    public static final int STONE_TRESHOLD = 128;
-    public static final int IRON_TRESHOLD = 4;
     private final SocialCreditsManager scManager;
-    private final HashMap<UUID,Integer> stoneCounter;
-    private final HashMap<UUID,Integer> ironCounter;
+    private final Datasets datas;
+    private EnumMap<Material, HashMap<UUID, Integer>> playersData;
 
-    public PlayerAction(SocialCreditsManager scManager ){
+    public PlayerAction(SocialCreditsManager scManager, PlayersData playerData){
         this.scManager = scManager;
-        stoneCounter = new HashMap<>();
-        ironCounter = new HashMap<>();
+        this.playersData = playerData.getMap();
+        this.datas = new Datasets();
     }
 
     public boolean isSilkTouch( Player player){
@@ -37,89 +44,109 @@ public class PlayerAction implements Listener {
         return (itemUsedMainHand.containsEnchantment(Enchantment.SILK_TOUCH) || itemUsedOffHand.containsEnchantment(Enchantment.SILK_TOUCH));
     }
 
+    private void handleCropDrop(ItemStack k, Player player) {
+        Material material = k.getType();
+        player.sendMessage(ChatColor.RED + "item processed : " + material);
+        if(!playersData.containsKey(material) && !datas.cropReward.containsKey(material)){
+            return;
+        }
+
+        if(!playersData.get(material).containsKey(player.getUniqueId())){
+            playersData.get(material).put(player.getUniqueId(), 1);
+        }
+
+        int lootedTotal = playersData.get(material).get(player.getUniqueId());
+        int threshold = datas.cropThresholds.get(material);
+
+        if(lootedTotal >= threshold){
+            playersData.get(material).replace(player.getUniqueId(), k.getAmount());
+            player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
+            scManager.addPoints(player, datas.cropReward.get(material));
+            return;
+        }else {
+            player.sendMessage(ChatColor.RED + "current total : " + lootedTotal + " | amount just looted : " + k.getAmount() );
+            lootedTotal = lootedTotal + k.getAmount();
+            playersData.get(material).replace(player.getUniqueId(), lootedTotal);
+
+        }
+        player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
+    }
+
+    private void handleOre(Player player, Block block) {
+        Material material = block.getType();
+
+        if(!playersData.get(material).containsKey(player.getUniqueId())){
+            playersData.get(material).put(player.getUniqueId(), 1);
+        }
+        int brokenBlocks = playersData.get(material).get(player.getUniqueId());
+        int threshold = datas.oreThresholds.get(material);
+
+        if(brokenBlocks >= threshold){
+            playersData.get(material).replace(player.getUniqueId(), 1);
+            player.sendMessage(ChatColor.GRAY + Integer.toString(brokenBlocks) + "/"+threshold + " " + Datasets.getPrettyName(material));
+            scManager.addPoints(player, datas.oreReward.get(material));
+            return;
+        }else {
+            playersData.get(material).replace(player.getUniqueId(), brokenBlocks  + 1);
+        }
+        player.sendMessage(ChatColor.GRAY + Integer.toString(brokenBlocks) + "/"+threshold + " " + Datasets.getPrettyName(material));
+    }
+
     @EventHandler
     public void onBlockBroken(BlockBreakEvent e){
         Block brokenBlock = e.getBlock();
         Player player = e.getPlayer();
 
-        if(!isSilkTouch(player)) {
-            switch (brokenBlock.getType()) {
-                case ANCIENT_DEBRIS:
-                    scManager.addPoints(player, 15);
-                    break;
-                case EMERALD_ORE:
-                case DEEPSLATE_EMERALD_ORE:
-                    scManager.addPoints(player, 10);
-                    break;
-                case DIAMOND_ORE:
-                case DEEPSLATE_DIAMOND_ORE:
-                    scManager.addPoints(player, 5);
-                    break;
-                case GOLD_ORE:
-                case DEEPSLATE_GOLD_ORE:
-                    scManager.addPoints(player, 1);
-                    break;
-                case IRON_ORE:
-                case DEEPSLATE_IRON_ORE:
-                    if(handleIron(player)){
-                        scManager.addPoints(player, 1);
-                    }
-                    break;
-                case DEEPSLATE:
-                case STONE:
-                    if(handleStone(player)){
-                        scManager.addPoints(player, 2);
-                    }
-                    break;
-                default:
-                    break;
+        if(Datasets.isHarvestableRightClick(brokenBlock.getType()) && Math.random() > 0.7){
+            player.sendMessage(ChatColor.GOLD + "You can earn social credits by harvesting these crops with right click (empty handed)");
+        }
+
+        if(isSilkTouch(player)) {
+            return;
+        }
+
+        if(datas.oreReward.containsKey(brokenBlock.getType())){
+            if(datas.oreThresholds.containsKey(brokenBlock.getType())){
+                handleOre(player, brokenBlock);
+            }else{
+                scManager.addPoints(player, datas.oreReward.get(brokenBlock.getType()));
             }
+        }
 
+    }
+    @EventHandler
+    public void onBlockClick(PlayerInteractEvent e){
+
+        if(e.getAction() != Action.RIGHT_CLICK_BLOCK){
+            return;
+        }
+        if(e.getItem() == null && e.getHand().equals(EquipmentSlot.HAND)){
+            Player player = e.getPlayer();
+            Block clickedBlock = e.getClickedBlock();
+            assert clickedBlock != null;
+            if(clickedBlock.getBlockData() instanceof Ageable){
+                Ageable blockData = (Ageable) clickedBlock.getBlockData();
+                if(blockData.getAge() == blockData.getMaximumAge()){
+                    Collection<ItemStack> drops = clickedBlock.getDrops();
+                    drops.forEach(k -> handleCropDrop(k, player));
+                    drops.forEach(k -> player.getWorld().dropItem(clickedBlock.getLocation(), k ));
+                    blockData.setAge(0);
+                    clickedBlock.setBlockData(blockData);
+                }else{
+                    player.sendMessage(ChatColor.GRAY + "This crop isn't fully grown yet !");
+                }
+            }
         }
     }
 
-    private boolean handleIron(Player player) {
-        if(!ironCounter.containsKey(player.getUniqueId())) {
-            ironCounter.put(player.getUniqueId(), 1);
-        }
-        int ironBroken = ironCounter.get(player.getUniqueId());
 
-        if(ironBroken >= IRON_TRESHOLD){
-            ironCounter.replace(player.getUniqueId(), 1);
-            player.sendMessage(ChatColor.GRAY + Integer.toString(ironBroken) + "/"+IRON_TRESHOLD+" iron");
-            return true;
-        }else {
-            ironCounter.replace(player.getUniqueId(), ironBroken  + 1);
-        }
-        player.sendMessage(ChatColor.GRAY + Integer.toString(ironBroken) + "/"+IRON_TRESHOLD+" iron");
-        return false;
-    }
-
-    private boolean handleStone(Player player) {
-        if(!stoneCounter.containsKey(player.getUniqueId())) {
-            stoneCounter.put(player.getUniqueId(), 1);
-        }
-        int stoneBroken = stoneCounter.get(player.getUniqueId());
-
-        if(stoneBroken >= STONE_TRESHOLD){
-            stoneCounter.replace(player.getUniqueId(), 0);
-            player.sendMessage(ChatColor.GRAY + Integer.toString(stoneBroken) + "/"+STONE_TRESHOLD+" stone gathering complete !");
-            return true;
-        }else {
-            stoneCounter.replace(player.getUniqueId(), stoneBroken  + 1);
-        }
-        if(stoneBroken % 8 == 0) {
-            player.sendMessage(ChatColor.GRAY + Integer.toString(stoneBroken) + "/" + STONE_TRESHOLD + " stone");
-        }
-        return false;
-    }
 
     @EventHandler
-    public void onPlayerHit(EntityDamageByEntityEvent e){
+    public void onEntityDamagedByEntity(EntityDamageByEntityEvent e){
         if(e.getDamager().getType() == EntityType.PLAYER) {
             Player damager = (Player) e.getDamager();
             if (e.getEntity().getType() == EntityType.PLAYER && e.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
-                scManager.removePoints(damager, (int) e.getFinalDamage() + 3);
+                scManager.removePoints(damager, (int) e.getFinalDamage() + 2);
             } else if (e.getEntity().getType() == EntityType.VILLAGER) {
                 scManager.removePoints(damager, 2);
             }
