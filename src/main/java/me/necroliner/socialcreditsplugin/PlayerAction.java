@@ -33,7 +33,7 @@ public class PlayerAction implements Listener {
     public PlayerAction(SocialCreditsManager scManager, PlayersData playerData){
         this.scManager = scManager;
         this.playersData = playerData.getMap();
-        this.datas = new Datasets();
+        this.datas = Datasets.getDataset();
     }
 
     public boolean isSilkTouch( Player player){
@@ -46,7 +46,7 @@ public class PlayerAction implements Listener {
 
     private void handleCropDrop(ItemStack k, Player player) {
         Material material = k.getType();
-        player.sendMessage(ChatColor.RED + "item processed : " + material);
+        //player.sendMessage(ChatColor.RED + "item processed : " + material);
         if(!playersData.containsKey(material) && !datas.cropReward.containsKey(material)){
             return;
         }
@@ -64,7 +64,7 @@ public class PlayerAction implements Listener {
             scManager.addPoints(player, datas.cropReward.get(material));
             return;
         }else {
-            player.sendMessage(ChatColor.RED + "current total : " + lootedTotal + " | amount just looted : " + k.getAmount() );
+            //player.sendMessage(ChatColor.RED + "current total : " + lootedTotal + " | amount just looted : " + k.getAmount() );
             lootedTotal = lootedTotal + k.getAmount();
             playersData.get(material).replace(player.getUniqueId(), lootedTotal);
 

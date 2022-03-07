@@ -13,14 +13,21 @@ public class Datasets {
     public final EnumMap<Material, Integer> cropReward;
     public final EnumMap<Material, Integer> cropThresholds;
 
-    public Datasets(){
+    private static Datasets datasets = null;
+
+    private Datasets(){
         oreThresholds = getOreThresholds();
         oreReward = getOreReward();
         cropReward = getCropReward();
         cropThresholds = getCropThresholds();
     }
 
-
+    public static Datasets getDataset(){
+        if(datasets == null){
+            datasets = new Datasets();
+        }
+        return datasets;
+    }
 
 
     private EnumMap<Material, Integer> getOreThresholds(){
@@ -78,7 +85,9 @@ public class Datasets {
     }
 
     public static String getPrettyName(Material material){
-        return material.name().toLowerCase(Locale.ROOT).replace("_", " ");
+        String name = material.name().toLowerCase(Locale.ROOT).replace("_", " ");
+
+        return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
 }

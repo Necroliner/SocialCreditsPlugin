@@ -13,7 +13,7 @@ public class PlayersData{
 
     public PlayersData(){
         materialsCounter = new EnumMap<>(Material.class);
-        Datasets data = new Datasets();
+        Datasets data = Datasets.getDataset();
         data.cropThresholds.forEach((k, v) -> materialsCounter.put(k, new HashMap<>()));
         data.oreThresholds.forEach((k, v) -> materialsCounter.put(k, new HashMap<>()));
         System.out.println("playerData initialised, materials : " + Arrays.toString(materialsCounter.entrySet().toArray()));

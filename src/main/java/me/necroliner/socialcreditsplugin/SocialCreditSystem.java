@@ -12,11 +12,11 @@ public final class SocialCreditSystem extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
-        StatsDisplayManager sdManager = new StatsDisplayManager(getServer().getScoreboardManager());
-        SocialCreditsManager scManager = new SocialCreditsManager(getServer().getScoreboardManager());
-
         PlayersData playersData = new PlayersData();
+        StatsDisplayManager sdManager = new StatsDisplayManager(getServer().getScoreboardManager(), playersData);
+        SocialCreditsManager scManager = new SocialCreditsManager(getServer().getScoreboardManager(), sdManager);
+
+
 
         getServer().getPluginManager().registerEvents(new PlayerAction(scManager, playersData), this);
         getServer().getPluginManager().registerEvents(sdManager, this);

@@ -9,11 +9,12 @@ public class SocialCreditsManager {
 
     private final Scoreboard board;
     private final Objective objective;
+    private final StatsDisplayManager sdManager;
 
 
-    public SocialCreditsManager(ScoreboardManager sbManager){
+    public SocialCreditsManager(ScoreboardManager sbManager, StatsDisplayManager sdManager){
         this.board = sbManager.getMainScoreboard();
-
+        this.sdManager = sdManager;
         if(this.board.getObjective(OBJECTIVE_SOCIAL_CREDIT_NAME) == null) {
             System.out.println(SocialCreditSystem.LOGGER_NAME +"initialising new scoreboard");
 
@@ -35,7 +36,7 @@ public class SocialCreditsManager {
         }else{
             player.sendMessage(ChatColor.GREEN + "+" + points + " Social Credits !");
         }
-
+        sdManager.updateScoreboardCredits(player);
     }
 
     public void removePoints (Player player, int points){
@@ -47,7 +48,7 @@ public class SocialCreditsManager {
         }else{
             player.sendMessage(ChatColor.RED + "-" + points + " Social Credits !");
         }
-
+        sdManager.updateScoreboardCredits(player);
     }
 
     public int getScore(String playerName){
