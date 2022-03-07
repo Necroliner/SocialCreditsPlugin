@@ -17,9 +17,6 @@ import java.util.*;
 
 public class StatsDisplayManager implements Listener {
 
-    private static final String STATS_SCOREBOARD_NAME = "StatsDisplay";
-    private static final String STATS_SCOREBOARD_DISPLAY_NAME = ChatColor.GOLD + "Citizen stats";
-
     private final Datasets datas;
     private final ScoreboardManager sbManager;
     private EnumMap<Material, HashMap<UUID, Integer>> playersData;
@@ -48,14 +45,31 @@ public class StatsDisplayManager implements Listener {
 
         // Normally load this at start and pull from config
         String title = ChatColor.GOLD + "Citizen Stats";
-        List<String> lines = Arrays.asList(
-                ChatColor.GOLD +"Name : " + ChatColor.WHITE + player.getName(),
-                ChatColor.GOLD +"Social Credits : " + ChatColor.WHITE + sbManager.getMainScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(player.getName()).getScore(),
-                ChatColor.WHITE +"======================"
-        );
+        ArrayList<String> lines = new ArrayList<>();
+        lines.add(ChatColor.WHITE + "");
+        lines.add(ChatColor.GOLD + "Name : " + ChatColor.WHITE + player.getName());
+        lines.add(ChatColor.GOLD + "Social Credits : " + ChatColor.WHITE + sbManager.getMainScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(player.getName()).getScore());
+        lines.add(ChatColor.WHITE + "");
+        lines.add(ChatColor.WHITE + "======================");
 
+        datas.oreThresholds.forEach((k, v) -> {
+            HashMap<UUID, Integer> map = playersData.get(k);
+            if(map.containsKey(player.getUniqueId())) {
+                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            }else{
+                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            }
+        });
+        datas.cropThresholds.forEach((k, v) -> {
+            HashMap<UUID, Integer> map = playersData.get(k);
+            if(map.containsKey(player.getUniqueId())) {
+                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            }else{
+                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            }
+        });
 
-        // if player doesn't have scorebaord, create one
+        // if player doesn't have scoreboard, create one
         if (board == null) {
             board = new LightBoard(player, lines.size());
         }

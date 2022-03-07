@@ -18,8 +18,9 @@ public class SocialCreditsManager {
         if(this.board.getObjective(OBJECTIVE_SOCIAL_CREDIT_NAME) == null) {
             System.out.println(SocialCreditSystem.LOGGER_NAME +"initialising new scoreboard");
 
-            this.objective = board.registerNewObjective(OBJECTIVE_SOCIAL_CREDIT_NAME, "dummy", OBJECTIVE_SOCIAL_CREDIT_NAME);
-            this.objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
+            this.objective = board.registerNewObjective(OBJECTIVE_SOCIAL_CREDIT_NAME, "dummy");
+            this.objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+            this.objective.setDisplayName(OBJECTIVE_SOCIAL_CREDIT_NAME);
 
         }else{
             System.out.println(SocialCreditSystem.LOGGER_NAME +"Scoreboard already initialised");

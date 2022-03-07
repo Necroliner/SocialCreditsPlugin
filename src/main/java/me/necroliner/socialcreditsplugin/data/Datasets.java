@@ -33,9 +33,10 @@ public class Datasets {
     private EnumMap<Material, Integer> getOreThresholds(){
         EnumMap<Material, Integer> map = new EnumMap<>(Material.class);
         map.put(Material.STONE, 64);
-        map.put(Material.DEEPSLATE, 64);
         map.put(Material.IRON_ORE, 4);
+        map.put(Material.DEEPSLATE_IRON_ORE, 4);
         map.put(Material.COPPER_ORE, 8);
+        map.put(Material.DEEPSLATE_COPPER_ORE, 8);
         map.put(Material.WHEAT, 8);
         return map;
     }
@@ -43,7 +44,6 @@ public class Datasets {
     private EnumMap<Material, Integer> getOreReward() {
         EnumMap<Material, Integer> map = new EnumMap<>(Material.class);
         map.put(Material.STONE, 1);
-        map.put(Material.DEEPSLATE, 2);
         map.put(Material.COPPER_ORE, 1);
         map.put(Material.DEEPSLATE_COPPER_ORE, 2);
         map.put(Material.IRON_ORE, 1);

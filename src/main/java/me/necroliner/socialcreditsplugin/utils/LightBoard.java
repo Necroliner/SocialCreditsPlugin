@@ -11,6 +11,11 @@ import org.bukkit.scoreboard.Team;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+    Code written and created by Lightcaster5 (Lightcaster5#0001 @ discord.com)
+    https://github.com/Lightcaster5
+ */
+
 public class LightBoard {
 
     public Scoreboard board;

@@ -15,14 +15,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerAction implements Listener {
 
@@ -46,26 +44,23 @@ public class PlayerAction implements Listener {
 
     private void handleCropDrop(ItemStack k, Player player) {
         Material material = k.getType();
-        //player.sendMessage(ChatColor.RED + "item processed : " + material);
         if(!playersData.containsKey(material) && !datas.cropReward.containsKey(material)){
             return;
         }
 
         if(!playersData.get(material).containsKey(player.getUniqueId())){
-            playersData.get(material).put(player.getUniqueId(), 1);
+            playersData.get(material).put(player.getUniqueId(), k.getAmount()-1);
         }
 
-        int lootedTotal = playersData.get(material).get(player.getUniqueId());
+        int lootedTotal = playersData.get(material).get(player.getUniqueId()) + k.getAmount();
         int threshold = datas.cropThresholds.get(material);
 
         if(lootedTotal >= threshold){
-            playersData.get(material).replace(player.getUniqueId(), k.getAmount());
+            playersData.get(material).replace(player.getUniqueId(), lootedTotal - threshold );
             player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
             scManager.addPoints(player, datas.cropReward.get(material));
             return;
         }else {
-            //player.sendMessage(ChatColor.RED + "current total : " + lootedTotal + " | amount just looted : " + k.getAmount() );
-            lootedTotal = lootedTotal + k.getAmount();
             playersData.get(material).replace(player.getUniqueId(), lootedTotal);
 
         }
@@ -77,19 +72,17 @@ public class PlayerAction implements Listener {
 
         if(!playersData.get(material).containsKey(player.getUniqueId())){
             playersData.get(material).put(player.getUniqueId(), 1);
-        }
-        int brokenBlocks = playersData.get(material).get(player.getUniqueId());
-        int threshold = datas.oreThresholds.get(material);
+        }else{
+            int brokenBlocks = playersData.get(material).get(player.getUniqueId());
+            int threshold = datas.oreThresholds.get(material);
 
-        if(brokenBlocks >= threshold){
-            playersData.get(material).replace(player.getUniqueId(), 1);
-            player.sendMessage(ChatColor.GRAY + Integer.toString(brokenBlocks) + "/"+threshold + " " + Datasets.getPrettyName(material));
-            scManager.addPoints(player, datas.oreReward.get(material));
-            return;
-        }else {
-            playersData.get(material).replace(player.getUniqueId(), brokenBlocks  + 1);
+            if (brokenBlocks+1 >= threshold) {
+                playersData.get(material).replace(player.getUniqueId(), 0);
+                scManager.addPoints(player, datas.oreReward.get(material));
+            } else {
+                playersData.get(material).replace(player.getUniqueId(), brokenBlocks + 1);
+            }
         }
-        player.sendMessage(ChatColor.GRAY + Integer.toString(brokenBlocks) + "/"+threshold + " " + Datasets.getPrettyName(material));
     }
 
     @EventHandler
@@ -152,6 +145,7 @@ public class PlayerAction implements Listener {
             }
         }
     }
+
 
 
 }
