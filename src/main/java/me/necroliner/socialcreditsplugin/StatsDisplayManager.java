@@ -2,7 +2,7 @@ package me.necroliner.socialcreditsplugin;
 
 import me.necroliner.socialcreditsplugin.data.Datasets;
 import me.necroliner.socialcreditsplugin.data.PlayersData;
-import me.necroliner.socialcreditsplugin.toDelete.MapHandler;
+import me.necroliner.socialcreditsplugin.utils.LightBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,9 +13,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.*;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class StatsDisplayManager implements Listener {
 
@@ -26,7 +24,10 @@ public class StatsDisplayManager implements Listener {
     private final ScoreboardManager sbManager;
     private EnumMap<Material, HashMap<UUID, Integer>> playersData;
 
-    private final MapHandler map = new MapHandler();
+    private final Map<UUID, LightBoard> lightBoardMap = new HashMap<>();
+    private final Map<UUID, Integer> blockMap = new HashMap<>();
+
+    private long updateTime;
 
     public StatsDisplayManager(ScoreboardManager sbManager, PlayersData playersData){
         this.sbManager = sbManager;
@@ -36,97 +37,64 @@ public class StatsDisplayManager implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
-        createScoreboard(e.getPlayer());
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
-        map.removePlayerScoreboard(e.getPlayer());
     }
 
-    public void createScoreboard(Player player) {
-        String entryVoidString = "§7§7";
-        Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective(ChatColor.GOLD + "Citizen Stats", "dummy");
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+    public void scoreboard(Player player) {
+        LightBoard board = lightBoardMap.get(player.getUniqueId());
 
-        map.addPlayerScoreboard(player, scoreboard);
+        // Normally load this at start and pull from config
+        String title = ChatColor.GOLD + "Citizen Stats";
+        List<String> lines = Arrays.asList(
+                ChatColor.GOLD +"Name : " + ChatColor.WHITE + player.getName(),
+                ChatColor.GOLD +"Social Credits : " + ChatColor.WHITE + sbManager.getMainScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(player.getName()).getScore(),
+                ChatColor.WHITE +"======================"
+        );
 
-        Score blankLine = objective.getScore("§0");
-        blankLine.setScore(99);
 
-        if (scoreboard.getTeam("name") == null) {
-            scoreboard.registerNewTeam("name");
+        // if player doesn't have scorebaord, create one
+        if (board == null) {
+            board = new LightBoard(player, lines.size());
         }
-        scoreboard.getTeam("name").addEntry("§7");
-        scoreboard.getTeam("name").setPrefix(ChatColor.GOLD + "Citizen : ");
-        scoreboard.getTeam("name").setSuffix(ChatColor.WHITE + player.getName());
-        objective.getScore("§7").setScore(98);
 
-        if (scoreboard.getTeam("Social Credits") == null) {
-            scoreboard.registerNewTeam("Social Credits");
+
+        board.setTitle(title);
+        int lineNum = lines.size();
+        for (String line : lines) {
+            board.setLine(lineNum, line);
+            lineNum--;
         }
-        scoreboard.getTeam("Social Credits").addEntry("§7§7");
-        scoreboard.getTeam("Social Credits").setPrefix(ChatColor.GOLD + "Social Credits: ");
-        scoreboard.getTeam("Social Credits").setSuffix(ChatColor.WHITE + "" + player.getScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(player.getName()).getScore());
-        objective.getScore("§7§7").setScore(97);
 
-        Score separator1 = objective.getScore("======================");
-        separator1.setScore(95);
+        lightBoardMap.put(player.getUniqueId(), board);
+        player.setScoreboard(board.board);
 
-        if (scoreboard.getTeam("Stone") == null) {
-            scoreboard.registerNewTeam("Social Credits");
+    }
+    public void startLoop() {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(SocialCreditSystem.getInstance(), this::tick, 10L, 2L);
+    }
+
+    private void tick() {
+        long current = System.currentTimeMillis();
+        if (updateTime <= current) {
+            Bukkit.getOnlinePlayers().forEach(this::scoreboard);
+            clean();
+            updateTime = current + 250L;
         }
-        scoreboard.getTeam("Social Credits").addEntry("§7§7§7");
-        scoreboard.getTeam("Social Credits").setPrefix( "Stone : ");
-        scoreboard.getTeam("Social Credits").setSuffix("?/" + datas.oreThresholds.get(Material.STONE));
-        objective.getScore("§7§7§7").setScore(94);
+    }
 
-        for (HashMap.Entry<Material, Integer> entry : datas.oreThresholds.entrySet()) {
-            System.out.println(entry.getKey() + ":" + entry.getValue());
-
-            entryVoidString = entryVoidString + "§7";
-            String currentMaterial = Datasets.getPrettyName(entry.getKey());
-            if (scoreboard.getTeam(currentMaterial) == null) {
-                scoreboard.registerNewTeam(currentMaterial);
+    private void clean() {
+        List<UUID> removeList = new ArrayList<>();
+        for (UUID uuid : lightBoardMap.keySet()) {
+            if (Bukkit.getPlayer(uuid) == null || !Bukkit.getPlayer(uuid).isOnline()) {
+                removeList.add(uuid);
             }
-            scoreboard.getTeam(currentMaterial).addEntry(entryVoidString);
-            scoreboard.getTeam(currentMaterial).setPrefix( "Stone : ");
-            scoreboard.getTeam(currentMaterial).setSuffix("?/" + datas.oreThresholds.get(Material.STONE));
-            objective.getScore(entryVoidString).setScore(94);
         }
-
-        //map.addOnlinePlayer(player);
-        player.setScoreboard(scoreboard);
+        removeList.forEach(lightBoardMap::remove);
+        removeList.forEach(blockMap::remove);
     }
-    public void updateScoreboardCredits(Player player) {
-
-            Scoreboard scoreboard = map.getPlayerScoreboard(player);
-
-            if (scoreboard.getTeam("Social Credits") == null) {
-                scoreboard.registerNewTeam("Social Credits");
-            }
-            scoreboard.getTeam("Social Credits").setPrefix(ChatColor.GOLD + "Social Credits: ");
-            scoreboard.getTeam("Social Credits").setSuffix(ChatColor.WHITE + "" + sbManager.getMainScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(player.getName()).getScore());
-
-
-    }
-
-    public void updateScoreboardRessources(Player player) {
-
-        Scoreboard scoreboard = map.getPlayerScoreboard(player);
-        //EnumMap<Material, HashMap<UUID, Integer>> playersData
-        playersData.forEach((key,value) ->{
-            if(value.containsKey(player.getUniqueId())){
-
-            }
-        });
-
-
-    }
-
-
-
 
 
 }

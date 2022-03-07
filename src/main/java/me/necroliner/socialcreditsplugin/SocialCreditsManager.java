@@ -36,7 +36,6 @@ public class SocialCreditsManager {
         }else{
             player.sendMessage(ChatColor.GREEN + "+" + points + " Social Credits !");
         }
-        sdManager.updateScoreboardCredits(player);
     }
 
     public void removePoints (Player player, int points){
@@ -48,7 +47,6 @@ public class SocialCreditsManager {
         }else{
             player.sendMessage(ChatColor.RED + "-" + points + " Social Credits !");
         }
-        sdManager.updateScoreboardCredits(player);
     }
 
     public int getScore(String playerName){
