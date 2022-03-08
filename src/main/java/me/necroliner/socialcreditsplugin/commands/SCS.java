@@ -1,24 +1,21 @@
 package me.necroliner.socialcreditsplugin.commands;
 
-import me.necroliner.socialcreditsplugin.SocialCreditsManager;
+import me.necroliner.socialcreditsplugin.SocialCreditSystem;
+import me.necroliner.socialcreditsplugin.data.PlayersData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.management.PlatformLoggingMXBean;
-import java.util.Arrays;
-
 public class SCS implements CommandExecutor {
 
-    private SocialCreditsManager scManager;
+    private PlayersData playersData;
 
-    public SCS(SocialCreditsManager scManager) {
-        this.scManager = scManager;
+    public SCS(PlayersData playersData) {
+        this.playersData = playersData;
     }
 
     @Override
@@ -38,31 +35,53 @@ public class SCS implements CommandExecutor {
                 player.sendMessage(ChatColor.GOLD + "Citizen : " + ChatColor.WHITE + player.getName());
                 player.sendMessage(ChatColor.GOLD + "IP Address : " + ChatColor.WHITE + (player.getAddress()));
                 player.sendMessage(ChatColor.GOLD + "Level : " + ChatColor.WHITE + (player.getLevel()));
-                player.sendMessage(ChatColor.GOLD + "Social Credits : " + ChatColor.WHITE +  scManager.getScore(player.getName()));
+                player.sendMessage(ChatColor.GOLD + "Social Credits : " + ChatColor.WHITE +  playersData.getScore(player));
                 player.sendMessage(ChatColor.WHITE + "-----------------------------------------------------");
                 player.sendMessage(ChatColor.GOLD + "Type /scs help for more infos");
                 player.sendMessage(ChatColor.GRAY + "we know everything, we see everything.");
                 return true;
-            }else{
+            }else if(args.length == 1){
                 if( args[0].equalsIgnoreCase("help")){
                     player.sendMessage(ChatColor.GOLD + "This server is running the glorious " +ChatColor.RED+ "Social Credits System ");
                     player.sendMessage(ChatColor.WHITE + "This plugin is still a WIP, do not hesitate to make suggestions on discord" );
-                    player.sendMessage( ChatColor.GRAY + "${project.version} by Necroliner");
+                    player.sendMessage( ChatColor.GRAY + SocialCreditSystem.getInstance().getDescription().getVersion() + " by Necroliner");
 
-                }else if(args[0].equalsIgnoreCase("top")){
-                    player.sendMessage("List of potential players :");
-                    for(OfflinePlayer element : Bukkit.getServer().getOfflinePlayers()){
+                }/*else if(args[0].equalsIgnoreCase("top")){
+                    player.sendMessage("Top 25 players :");
 
-                        Integer score = Bukkit.getServer().getScoreboardManager().getMainScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(element.getName()).getScore();
-
-                        player.sendMessage(element.getName() + " | Social Credits : " + score);
-
-                    }
+                    sortHashMap(this.playersData.getSocialCreditsCounter())
+                            .forEach((k, v) -> player.sendMessage(ChatColor.GOLD + k + " : " + ChatColor.WHITE + v));
                     return true;
+                }*/
+            }else if(args.length == 2){
+                if(args[0].equalsIgnoreCase("get") ){
+                    Player target = Bukkit.getPlayer(args[1]);
+                    if(target == null){
+                        sender.sendMessage(ChatColor.RED + "Player inexistant or offline");
+                    }else {
+                        sender.sendMessage(ChatColor.GOLD + target.getName() + "'s Social credits : " + ChatColor.WHITE + playersData.getScore(target));
+                    }
+                }
+            }else if(args.length == 3){
+                if(args[0].equalsIgnoreCase("set") ){
+                    if(!sender.isOp()){
+                        sender.sendMessage(ChatColor.RED + "You do not have enough permissions to perform this action");
+                        return true;
+                    }
+                    Player target = Bukkit.getPlayer(args[1]);
+                    int points = Integer.parseInt(args[2]);
+                    if(target == null){
+                        sender.sendMessage(ChatColor.RED + "Player inexistant or offline");
+                    }else{
+                        playersData.setSocialCredit(target, points);
+                        sender.sendMessage(ChatColor.GREEN + "Done ! " + target.getName() + "'s Social credits set to " + points );
+                    }
                 }
             }
 
         }
         return true;
     }
+
+
 }

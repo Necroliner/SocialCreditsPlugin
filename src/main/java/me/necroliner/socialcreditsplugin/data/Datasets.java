@@ -1,7 +1,6 @@
 package me.necroliner.socialcreditsplugin.data;
 
 import org.bukkit.Material;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Locale;
@@ -37,7 +36,6 @@ public class Datasets {
         map.put(Material.DEEPSLATE_IRON_ORE, 4);
         map.put(Material.COPPER_ORE, 8);
         map.put(Material.DEEPSLATE_COPPER_ORE, 8);
-        map.put(Material.WHEAT, 8);
         return map;
     }
 
@@ -89,5 +87,4 @@ public class Datasets {
 
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
-
 }

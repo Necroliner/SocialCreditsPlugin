@@ -15,22 +15,21 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.*;
 
 public class PlayerAction implements Listener {
 
-    private final SocialCreditsManager scManager;
     private final Datasets datas;
-    private EnumMap<Material, HashMap<UUID, Integer>> playersData;
+    private final EnumMap<Material, HashMap<UUID, Integer>> materialCounter;
+    private final PlayersData playersData;
 
-    public PlayerAction(SocialCreditsManager scManager, PlayersData playerData){
-        this.scManager = scManager;
-        this.playersData = playerData.getMap();
+    public PlayerAction(PlayersData playersData){
+
+        this.materialCounter = playersData.getMaterialsCounterMap();
+        this.playersData = playersData;
         this.datas = Datasets.getDataset();
     }
 
@@ -44,24 +43,24 @@ public class PlayerAction implements Listener {
 
     private void handleCropDrop(ItemStack k, Player player) {
         Material material = k.getType();
-        if(!playersData.containsKey(material) && !datas.cropReward.containsKey(material)){
+        if(!materialCounter.containsKey(material) && !datas.cropReward.containsKey(material)){
             return;
         }
 
-        if(!playersData.get(material).containsKey(player.getUniqueId())){
-            playersData.get(material).put(player.getUniqueId(), k.getAmount()-1);
+        if(!materialCounter.get(material).containsKey(player.getUniqueId())){
+            materialCounter.get(material).put(player.getUniqueId(), k.getAmount()-1);
         }
 
-        int lootedTotal = playersData.get(material).get(player.getUniqueId()) + k.getAmount();
+        int lootedTotal = materialCounter.get(material).get(player.getUniqueId()) + k.getAmount();
         int threshold = datas.cropThresholds.get(material);
 
         if(lootedTotal >= threshold){
-            playersData.get(material).replace(player.getUniqueId(), lootedTotal - threshold );
+            materialCounter.get(material).replace(player.getUniqueId(), lootedTotal - threshold );
             player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
-            scManager.addPoints(player, datas.cropReward.get(material));
+            playersData.addSocialCredit(player, datas.cropReward.get(material));
             return;
         }else {
-            playersData.get(material).replace(player.getUniqueId(), lootedTotal);
+            materialCounter.get(material).replace(player.getUniqueId(), lootedTotal);
 
         }
         player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
@@ -70,17 +69,17 @@ public class PlayerAction implements Listener {
     private void handleOre(Player player, Block block) {
         Material material = block.getType();
 
-        if(!playersData.get(material).containsKey(player.getUniqueId())){
-            playersData.get(material).put(player.getUniqueId(), 1);
+        if(!materialCounter.get(material).containsKey(player.getUniqueId())){
+            materialCounter.get(material).put(player.getUniqueId(), 1);
         }else{
-            int brokenBlocks = playersData.get(material).get(player.getUniqueId());
+            int brokenBlocks = materialCounter.get(material).get(player.getUniqueId());
             int threshold = datas.oreThresholds.get(material);
 
             if (brokenBlocks+1 >= threshold) {
-                playersData.get(material).replace(player.getUniqueId(), 0);
-                scManager.addPoints(player, datas.oreReward.get(material));
+                materialCounter.get(material).replace(player.getUniqueId(), 0);
+                playersData.addSocialCredit(player, datas.oreReward.get(material));
             } else {
-                playersData.get(material).replace(player.getUniqueId(), brokenBlocks + 1);
+                materialCounter.get(material).replace(player.getUniqueId(), brokenBlocks + 1);
             }
         }
     }
@@ -102,7 +101,7 @@ public class PlayerAction implements Listener {
             if(datas.oreThresholds.containsKey(brokenBlock.getType())){
                 handleOre(player, brokenBlock);
             }else{
-                scManager.addPoints(player, datas.oreReward.get(brokenBlock.getType()));
+                playersData.addSocialCredit(player, datas.oreReward.get(brokenBlock.getType()));
             }
         }
 
@@ -132,20 +131,15 @@ public class PlayerAction implements Listener {
         }
     }
 
-
-
     @EventHandler
     public void onEntityDamagedByEntity(EntityDamageByEntityEvent e){
         if(e.getDamager().getType() == EntityType.PLAYER) {
             Player damager = (Player) e.getDamager();
             if (e.getEntity().getType() == EntityType.PLAYER && e.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
-                scManager.removePoints(damager, (int) e.getFinalDamage() + 2);
+                playersData.removeSocialCredit(damager,(int) (e.getFinalDamage() + 2));
             } else if (e.getEntity().getType() == EntityType.VILLAGER) {
-                scManager.removePoints(damager, 2);
+                playersData.removeSocialCredit(damager,  2);
             }
         }
     }
-
-
-
 }

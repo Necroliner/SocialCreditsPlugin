@@ -7,37 +7,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scoreboard.*;
-
 import java.util.*;
 
 public class StatsDisplayManager implements Listener {
 
     private final Datasets datas;
-    private final ScoreboardManager sbManager;
-    private EnumMap<Material, HashMap<UUID, Integer>> playersData;
+    private final EnumMap<Material, HashMap<UUID, Integer>> materialCounter;
+    private final PlayersData playersData;
 
     private final Map<UUID, LightBoard> lightBoardMap = new HashMap<>();
     private final Map<UUID, Integer> blockMap = new HashMap<>();
 
     private long updateTime;
 
-    public StatsDisplayManager(ScoreboardManager sbManager, PlayersData playersData){
-        this.sbManager = sbManager;
-        this.playersData = playersData.getMap();
+    public StatsDisplayManager(PlayersData playersData){
+        this.materialCounter = playersData.getMaterialsCounterMap();
+        this.playersData = playersData;
         this.datas = Datasets.getDataset();
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e){
-    }
-
-    @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent e){
     }
 
     public void scoreboard(Player player) {
@@ -48,20 +35,21 @@ public class StatsDisplayManager implements Listener {
         ArrayList<String> lines = new ArrayList<>();
         lines.add(ChatColor.WHITE + "");
         lines.add(ChatColor.GOLD + "Name : " + ChatColor.WHITE + player.getName());
-        lines.add(ChatColor.GOLD + "Social Credits : " + ChatColor.WHITE + sbManager.getMainScoreboard().getObjective(SocialCreditsManager.OBJECTIVE_SOCIAL_CREDIT_NAME).getScore(player.getName()).getScore());
+        lines.add(ChatColor.GOLD + "Social Credits : " + ChatColor.WHITE + playersData.getScore(player));
         lines.add(ChatColor.WHITE + "");
         lines.add(ChatColor.WHITE + "======================");
 
         datas.oreThresholds.forEach((k, v) -> {
-            HashMap<UUID, Integer> map = playersData.get(k);
+            HashMap<UUID, Integer> map = materialCounter.get(k);
             if(map.containsKey(player.getUniqueId())) {
                 lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
             }else{
                 lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
             }
         });
+
         datas.cropThresholds.forEach((k, v) -> {
-            HashMap<UUID, Integer> map = playersData.get(k);
+            HashMap<UUID, Integer> map = materialCounter.get(k);
             if(map.containsKey(player.getUniqueId())) {
                 lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
             }else{
