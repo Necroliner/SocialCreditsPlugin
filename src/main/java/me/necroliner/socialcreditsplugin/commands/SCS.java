@@ -1,7 +1,7 @@
 package me.necroliner.socialcreditsplugin.commands;
 
 import me.necroliner.socialcreditsplugin.SocialCreditSystem;
-import me.necroliner.socialcreditsplugin.data.PlayersData;
+import me.necroliner.socialcreditsplugin.PlayersData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -46,6 +46,12 @@ public class SCS implements CommandExecutor {
                     player.sendMessage(ChatColor.WHITE + "This plugin is still a WIP, do not hesitate to make suggestions on discord" );
                     player.sendMessage( ChatColor.GRAY + SocialCreditSystem.getInstance().getDescription().getVersion() + " by Necroliner");
 
+                }else if(args[0].equalsIgnoreCase("toggle")){
+                    if(playersData.getIgnoreBoard().contains(player.getUniqueId())){
+                        playersData.removePlayerHiddenStats(player);
+                    }else{
+                        playersData.addPlayerHiddenStats(player);
+                    }
                 }/*else if(args[0].equalsIgnoreCase("top")){
                     player.sendMessage("Top 25 players :");
 

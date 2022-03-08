@@ -2,7 +2,6 @@ package me.necroliner.socialcreditsplugin;
 
 
 import me.necroliner.socialcreditsplugin.data.Datasets;
-import me.necroliner.socialcreditsplugin.data.PlayersData;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

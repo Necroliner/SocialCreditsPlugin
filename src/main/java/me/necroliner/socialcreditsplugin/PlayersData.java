@@ -1,7 +1,7 @@
-package me.necroliner.socialcreditsplugin.data;
+package me.necroliner.socialcreditsplugin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.necroliner.socialcreditsplugin.SocialCreditSystem;
+import me.necroliner.socialcreditsplugin.data.Datasets;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,6 +13,8 @@ public class PlayersData{
 
     private final EnumMap<Material, HashMap<UUID, Integer>> materialsCounter;
     private final HashMap<String, Integer> socialCreditCounter;
+    private final ArrayList<UUID> ignoreBoard = new ArrayList<>();
+
     private long updateTime;
 
     public PlayersData(){
@@ -106,5 +108,17 @@ public class PlayersData{
             System.out.println("saved social credits.");
             updateTime = current + 60000L;
         }
+    }
+
+    public ArrayList<UUID> getIgnoreBoard() {
+        return ignoreBoard;
+    }
+
+    public void removePlayerHiddenStats(Player player) {
+            ignoreBoard.remove(player.getUniqueId());
+    }
+
+    public void addPlayerHiddenStats(Player player) {
+            ignoreBoard.add(player.getUniqueId());
     }
 }

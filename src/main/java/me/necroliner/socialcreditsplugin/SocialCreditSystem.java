@@ -1,7 +1,6 @@
 package me.necroliner.socialcreditsplugin;
 
 import me.necroliner.socialcreditsplugin.commands.SCS;
-import me.necroliner.socialcreditsplugin.data.PlayersData;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 

@@ -1,7 +1,6 @@
 package me.necroliner.socialcreditsplugin;
 
 import me.necroliner.socialcreditsplugin.data.Datasets;
-import me.necroliner.socialcreditsplugin.data.PlayersData;
 import me.necroliner.socialcreditsplugin.utils.LightBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,7 +16,6 @@ public class StatsDisplayManager implements Listener {
     private final PlayersData playersData;
 
     private final Map<UUID, LightBoard> lightBoardMap = new HashMap<>();
-    private final Map<UUID, Integer> blockMap = new HashMap<>();
 
     private long updateTime;
 
@@ -57,8 +55,13 @@ public class StatsDisplayManager implements Listener {
             }
         });
 
-        // if player doesn't have scoreboard, create one
-        if (board == null) {
+        if(playersData.getIgnoreBoard().contains(player.getUniqueId())){
+            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            return;
+        }
+
+        // if player doesn't have scoreboard, create on
+        if (board == null ) {
             board = new LightBoard(player, lines.size());
         }
 
@@ -90,12 +93,12 @@ public class StatsDisplayManager implements Listener {
     private void clean() {
         List<UUID> removeList = new ArrayList<>();
         for (UUID uuid : lightBoardMap.keySet()) {
-            if (Bukkit.getPlayer(uuid) == null || !Bukkit.getPlayer(uuid).isOnline()) {
+            if (Bukkit.getPlayer(uuid) == null || !Bukkit.getPlayer(uuid).isOnline() || playersData.getIgnoreBoard().contains(uuid)) {
+                System.out.println("cleared player :" + uuid);
                 removeList.add(uuid);
             }
         }
         removeList.forEach(lightBoardMap::remove);
-        removeList.forEach(blockMap::remove);
     }
 
 
