@@ -4,21 +4,28 @@ import me.necroliner.socialcreditsplugin.SocialCreditSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
+import java.util.HashMap;
 
 public class NameManager {
 
     private long updateTime;
+    public static HashMap<Player, String> teamData = new HashMap<>();
 
     public static void update(Player player) {
-
+        String playerName = player.getName();
+        if(player.isOp()){
+            playerName = "§c" + playerName;
+        }
         String playerTeam = getPlayerTeam(player);
         String prefix = managePrefix(playerTeam);
-        player.setPlayerListName(prefix + "§r" + player.getName() );
-        player.setDisplayName(prefix + "§7" + player.getName() + "§r");
+        player.setPlayerListName(prefix + "§r" + playerName + "§r");
+        player.setDisplayName(prefix + "§7" + playerName + "§r");
 
+
+        teamData.put(player, prefix);
     }
 
-    private static String getPlayerTeam(Player player){
+    public static String getPlayerTeam(Player player){
         String playerTeam = "None";
         for(Team team : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()){
             if(team.getEntries().contains(player.getName())){

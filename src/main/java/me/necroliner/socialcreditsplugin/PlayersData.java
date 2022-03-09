@@ -1,6 +1,7 @@
 package me.necroliner.socialcreditsplugin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.tools.javac.util.Pair;
 import me.necroliner.socialcreditsplugin.data.Datasets;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -120,4 +121,59 @@ public class PlayersData{
     public void addPlayerHiddenStats(Player player) {
             ignoreBoard.add(player.getUniqueId());
     }
+
+    public void sortHashMap(){
+
+    }
+
+
 }
+/*
+class Sort
+{
+    public static void main (String[] args) throws java.lang.Exception
+    {
+        // Creating an array of superHero names and their strengths.
+        String[] superHeroes = new String[] { "CaptainAmerica" , "Thanos" , "Thor" , "IronMan" };
+        Integer[] strength = new Integer[] { 50 , 100 , 75 , 50 };
+
+        // Insert the superHero name and its strength as a key-value pair inside a HashMap.
+        Map hashmap = new HashMap<>();
+        for (int i=0 ; i < superHeroes.length ; i++) {
+            hashmap.put( superHeroes[i] , strength[i] );
+        }
+
+
+        Map sortedMap = sortedHashMapByValues(hashmap);
+
+    }
+
+    private static Map sortedHashMapByValues(Map<String, Integer> hashmap) {
+        // Create an ArrayList and insert all hashmap key-value pairs.
+        ArrayList<Map.Entry<String, Integer>> arrayList = new ArrayList<>();
+        arrayList.addAll(hashmap.entrySet());
+
+        // Sort the Arraylist using a custom comparator.
+        Collections.sort(arrayList, new Comparator() {
+            @Override
+            public int compare(Map.Entry o1, Map.Entry o2) {
+                if ( o1.getValue() == o2.getValue() )
+                    return o1.getKey().compareTo(o2.getKey());
+
+                return Integer.compare(o1.getValue() , o2.getValue());
+            }
+        });
+
+        // Create a LinkedHashMap.
+        Map sortedMap = new LinkedHashMap<>();
+
+        // Iterate over the ArrayList and insert the key-value pairs into LinkedHashMap.
+        for (int i=0 ; i hashmap) {
+            for( Map.Entry entry : hashmap.entrySet() ) {
+                System.out.println( "Key : " + entry.getKey()+ " \t  value :  " + entry.getValue() );
+            }
+        }
+    }
+
+}
+*/

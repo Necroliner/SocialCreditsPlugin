@@ -59,8 +59,8 @@ public class PlayerAction implements Listener {
             playersData.addSocialCredit(player, datas.cropReward.get(material));
         }else {
             materialCounter.get(material).replace(player.getUniqueId(), lootedTotal);
-
         }
+        notifyPlayer(player,material);
     }
 
     private void handleOre(Player player, Block block) {
@@ -79,7 +79,22 @@ public class PlayerAction implements Listener {
                 materialCounter.get(material).replace(player.getUniqueId(), brokenBlocks + 1);
             }
         }
+        notifyPlayer(player,material);
     }
+
+    private void notifyPlayer(Player player, Material material){
+        String message;
+        if(datas.oreThresholds.containsKey(material)){
+            message = "§6" + materialCounter.get(material).get(player.getUniqueId()) + "§f/" + datas.oreThresholds.get(material) + " " + Datasets.getPrettyName(material);
+        }else if(datas.cropThresholds.containsKey(material)){
+            message = "§6" + materialCounter.get(material).get(player.getUniqueId()) + "§f/" + datas.cropThresholds.get(material) + " " + Datasets.getPrettyName(material);
+        }else{
+            return;
+        }
+
+        Datasets.sendActionBar(player,message);
+    }
+
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {

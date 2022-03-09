@@ -1,6 +1,7 @@
 package me.necroliner.socialcreditsplugin;
 
 import me.necroliner.socialcreditsplugin.data.Datasets;
+import me.necroliner.socialcreditsplugin.data.NameManager;
 import me.necroliner.socialcreditsplugin.utils.LightBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,28 +36,10 @@ public class StatsDisplayManager implements Listener {
         String title = ChatColor.GOLD + "Citizen Stats";
         ArrayList<String> lines = new ArrayList<>();
         lines.add(ChatColor.WHITE + "");
-        lines.add(ChatColor.GOLD + "Name : " + ChatColor.WHITE + player.getName());
-        lines.add(ChatColor.GOLD + "Social Credits : " + ChatColor.WHITE + playersData.getScore(player));
+        lines.add(ChatColor.GOLD + "Alliance §f: " + NameManager.teamData.get(player));
+        lines.add(ChatColor.GOLD + "Name §f: " + player.getName());
+        lines.add(ChatColor.GOLD + "Social Credits §f: " + playersData.getScore(player));
         lines.add(ChatColor.WHITE + "");
-        lines.add(ChatColor.WHITE + "======================");
-
-        datas.oreThresholds.forEach((k, v) -> {
-            HashMap<UUID, Integer> map = materialCounter.get(k);
-            if (map.containsKey(player.getUniqueId())) {
-                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
-            } else {
-                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
-            }
-        });
-
-        datas.cropThresholds.forEach((k, v) -> {
-            HashMap<UUID, Integer> map = materialCounter.get(k);
-            if (map.containsKey(player.getUniqueId())) {
-                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
-            } else {
-                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
-            }
-        });
 
         if (playersData.getIgnoreBoard().contains(player.getUniqueId())) {
             player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
