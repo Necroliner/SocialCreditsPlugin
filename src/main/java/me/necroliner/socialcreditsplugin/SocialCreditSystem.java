@@ -1,6 +1,7 @@
 package me.necroliner.socialcreditsplugin;
 
 import me.necroliner.socialcreditsplugin.commands.SCS;
+import me.necroliner.socialcreditsplugin.data.NameManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 
@@ -15,7 +16,9 @@ public final class SocialCreditSystem extends JavaPlugin {
         this.instance = this;
         this.playersData = new PlayersData();
         StatsDisplayManager sdManager = new StatsDisplayManager(playersData);
+        NameManager nameManager = new NameManager();
         sdManager.startLoop();
+        nameManager.startLoop();
 
         getServer().getPluginManager().registerEvents(new PlayerAction(playersData), instance);
         getServer().getPluginManager().registerEvents(sdManager, instance);

@@ -1,6 +1,9 @@
 package me.necroliner.socialcreditsplugin.data;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Locale;
@@ -86,5 +89,11 @@ public class Datasets {
         String name = material.name().toLowerCase(Locale.ROOT).replace("_", " ");
 
         return name.substring(0, 1).toUpperCase() + name.substring(1);
+    }
+
+    public static void sendActionBar(Player player, String message){
+        TextComponent textComponent;
+        textComponent = Component.text(message);
+        player.sendActionBar(textComponent);
     }
 }

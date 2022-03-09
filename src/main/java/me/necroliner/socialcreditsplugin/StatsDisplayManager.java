@@ -7,6 +7,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 import java.util.*;
 
 public class StatsDisplayManager implements Listener {
@@ -39,29 +42,29 @@ public class StatsDisplayManager implements Listener {
 
         datas.oreThresholds.forEach((k, v) -> {
             HashMap<UUID, Integer> map = materialCounter.get(k);
-            if(map.containsKey(player.getUniqueId())) {
-                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
-            }else{
-                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            if (map.containsKey(player.getUniqueId())) {
+                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            } else {
+                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
             }
         });
 
         datas.cropThresholds.forEach((k, v) -> {
             HashMap<UUID, Integer> map = materialCounter.get(k);
-            if(map.containsKey(player.getUniqueId())) {
-                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
-            }else{
-                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY  + v  + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            if (map.containsKey(player.getUniqueId())) {
+                lines.add(ChatColor.WHITE + map.get(player.getUniqueId()).toString() + "/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
+            } else {
+                lines.add(ChatColor.WHITE + "0/" + ChatColor.GRAY + v + " " + ChatColor.GOLD + Datasets.getPrettyName(k));
             }
         });
 
-        if(playersData.getIgnoreBoard().contains(player.getUniqueId())){
+        if (playersData.getIgnoreBoard().contains(player.getUniqueId())) {
             player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             return;
         }
 
         // if player doesn't have scoreboard, create on
-        if (board == null ) {
+        if (board == null) {
             board = new LightBoard(player, lines.size());
         }
 
@@ -73,9 +76,19 @@ public class StatsDisplayManager implements Listener {
             lineNum--;
         }
 
+        //setting credits for each players in the tab
+        Objective objective = board.board.getObjective("pl1");
+        if (objective == null) {
+            objective = board.board.registerNewObjective("pl1", "dummy", "pl1");
+            objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+        }
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            Score score = objective.getScore(onlinePlayer.getName());
+            score.setScore(playersData.getScore(onlinePlayer));
+        }
+
         lightBoardMap.put(player.getUniqueId(), board);
         player.setScoreboard(board.board);
-
     }
     public void startLoop() {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(SocialCreditSystem.getInstance(), this::tick, 10L, 2L);

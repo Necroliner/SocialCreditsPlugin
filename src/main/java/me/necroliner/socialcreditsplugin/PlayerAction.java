@@ -14,6 +14,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -55,14 +56,11 @@ public class PlayerAction implements Listener {
 
         if(lootedTotal >= threshold){
             materialCounter.get(material).replace(player.getUniqueId(), lootedTotal - threshold );
-            player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
             playersData.addSocialCredit(player, datas.cropReward.get(material));
-            return;
         }else {
             materialCounter.get(material).replace(player.getUniqueId(), lootedTotal);
 
         }
-        player.sendMessage(ChatColor.GRAY + Integer.toString(lootedTotal) + "/"+threshold + " " + Datasets.getPrettyName(material));
     }
 
     private void handleOre(Player player, Block block) {
@@ -84,12 +82,20 @@ public class PlayerAction implements Listener {
     }
 
     @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        event.setFormat("%s: %s");
+    }
+
+    @EventHandler
     public void onBlockBroken(BlockBreakEvent e){
         Block brokenBlock = e.getBlock();
         Player player = e.getPlayer();
 
-        if(Datasets.isHarvestableRightClick(brokenBlock.getType()) && Math.random() > 0.7){
-            player.sendMessage(ChatColor.GOLD + "You can earn social credits by harvesting these crops with right click (empty handed)");
+        if(Datasets.isHarvestableRightClick(brokenBlock.getType())){
+            Ageable blockData = (Ageable) brokenBlock.getBlockData();
+            if(blockData.getAge() == blockData.getMaximumAge()) {
+                Datasets.sendActionBar(player,ChatColor.GOLD + "You can earn social credits by harvesting these crops with right click (empty handed)");
+            }
         }
 
         if(isSilkTouch(player)) {
@@ -124,7 +130,7 @@ public class PlayerAction implements Listener {
                     blockData.setAge(0);
                     clickedBlock.setBlockData(blockData);
                 }else{
-                    player.sendMessage(ChatColor.GRAY + "This crop isn't fully grown yet !");
+                    Datasets.sendActionBar(player,ChatColor.GRAY + "This crop isn't fully grown yet !");
                 }
             }
         }

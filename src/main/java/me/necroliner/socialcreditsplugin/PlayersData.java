@@ -56,7 +56,6 @@ public class PlayersData{
     }
 
     public void addSocialCredit(Player player, int points){
-
         if(!socialCreditCounter.containsKey(player.getName())){
             socialCreditCounter.put(player.getName(), points);
         }else{
@@ -65,9 +64,9 @@ public class PlayersData{
         }
 
         if(points<2) {
-            player.sendMessage(ChatColor.GREEN + "+" + points + " Social Credit !");
+            Datasets.sendActionBar(player,ChatColor.GREEN + "+" + points + " Social Credit !" );
         }else{
-            player.sendMessage(ChatColor.GREEN + "+" + points + " Social Credits !");
+            Datasets.sendActionBar(player, ChatColor.GREEN + "+" + points + " Social Credits !");
         }
     }
 
@@ -80,9 +79,9 @@ public class PlayersData{
             socialCreditCounter.replace(player.getName(), currentScore - points);
         }
         if(points<2) {
-            player.sendMessage(ChatColor.RED + "-" + points + " Social Credit !");
+            Datasets.sendActionBar(player,ChatColor.RED + "-" + points + " Social Credit !");
         }else{
-            player.sendMessage(ChatColor.RED + "-" + points + " Social Credits !");
+            Datasets.sendActionBar(player,ChatColor.RED + "-" + points + " Social Credits !");
         }
     }
 
