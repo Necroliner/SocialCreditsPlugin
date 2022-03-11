@@ -90,7 +90,6 @@ public class StatsDisplayManager implements Listener {
         List<UUID> removeList = new ArrayList<>();
         for (UUID uuid : lightBoardMap.keySet()) {
             if (Bukkit.getPlayer(uuid) == null || !Bukkit.getPlayer(uuid).isOnline() || playersData.getIgnoreBoard().contains(uuid)) {
-                System.out.println("cleared player :" + uuid);
                 removeList.add(uuid);
             }
         }

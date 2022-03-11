@@ -1,7 +1,6 @@
 package me.necroliner.socialcreditsplugin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.tools.javac.util.Pair;
 import me.necroliner.socialcreditsplugin.data.Datasets;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import java.io.File;
 import java.util.*;
+import java.util.logging.Level;
 
 public class PlayersData{
 
@@ -105,8 +105,8 @@ public class PlayersData{
         long current = System.currentTimeMillis();
         if (updateTime <= current) {
             saveSocialCredits();
-            System.out.println("saved social credits.");
-            updateTime = current + 60000L;
+            SocialCreditSystem.LOGGER.log(Level.INFO,"saved social credits.");
+            updateTime = current + 300000L;
         }
     }
 

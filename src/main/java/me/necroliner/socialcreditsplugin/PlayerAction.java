@@ -12,8 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -162,4 +161,24 @@ public class PlayerAction implements Listener {
             }
         }
     }
+    @EventHandler
+    public void onEntityDeath(EntityDeathEvent event) {
+        if(event.getEntity() instanceof Creeper){
+            if(event.getEntity().getKiller() != null) {
+                playersData.addSocialCredit(event.getEntity().getKiller(), 2);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onExplosion(EntityExplodeEvent event){
+        if(event.getEntity().getType() == EntityType.CREEPER){
+            Creeper creeper = (Creeper) event.getEntity();
+            if(creeper.getTarget().getType() == EntityType.PLAYER){
+                Player player = (Player) creeper.getTarget();
+                playersData.removeSocialCredit(player, 10);
+            }
+        }
+    }
 }
+
