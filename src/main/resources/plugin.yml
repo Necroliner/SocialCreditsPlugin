@@ -8,3 +8,6 @@ commands:
   scs:
     description: displays social credits count
     usage: /<command>
+  gui:
+    description: opens the gui
+    usage: /<command>

@@ -60,10 +60,12 @@ public class Datasets {
     }
     private EnumMap<Material, Integer> getCropThresholds(){
         EnumMap<Material, Integer> map = new EnumMap<>(Material.class);
-        map.put(Material.WHEAT, 32);
-        map.put(Material.CARROT, 32);
-        map.put(Material.POTATO, 32);
-        map.put(Material.BEETROOT, 32);
+        map.put(Material.WHEAT, 48);
+        map.put(Material.CARROT, 48);
+        map.put(Material.POTATO, 48);
+        map.put(Material.BEETROOT, 48);
+        map.put(Material.NETHER_WART, 48);
+        map.put(Material.COCOA_BEANS, 48);
         return map;
     }
 
@@ -73,6 +75,8 @@ public class Datasets {
         map.put(Material.CARROT, 1);
         map.put(Material.POTATO, 1);
         map.put(Material.BEETROOT, 1);
+        map.put(Material.NETHER_WART, 1);
+        map.put(Material.COCOA_BEANS, 1);
         return map;
     }
 
@@ -82,6 +86,8 @@ public class Datasets {
         harvestableList.add(Material.CARROTS);
         harvestableList.add(Material.POTATOES);
         harvestableList.add(Material.BEETROOTS);
+        harvestableList.add(Material.NETHER_WART);
+        harvestableList.add(Material.COCOA_BEANS);
         return harvestableList.contains(material);
     }
 

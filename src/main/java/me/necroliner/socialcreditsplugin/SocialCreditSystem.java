@@ -27,6 +27,7 @@ public final class SocialCreditSystem extends JavaPlugin {
         getServer().getPluginManager().registerEvents(sdManager, instance);
 
         Objects.requireNonNull(getCommand("scs")).setExecutor(new SCS(playersData));
+        Objects.requireNonNull(getCommand("gui")).setExecutor(new UIManager());
 
         SocialCreditSystem.LOGGER.log(Level.INFO, " Finished plugin startup");
     }

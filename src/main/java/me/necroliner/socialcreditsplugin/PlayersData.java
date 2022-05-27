@@ -12,6 +12,7 @@ import java.util.logging.Level;
 
 public class PlayersData{
 
+    private static final String SOCIAL_CREDITS_JSON_PATH = "plugins" + File.pathSeparatorChar + "socialCreditsMap.json";
     private final EnumMap<Material, HashMap<UUID, Integer>> materialsCounter;
     private final HashMap<String, Integer> socialCreditCounter;
     private final ArrayList<UUID> ignoreBoard = new ArrayList<>();
@@ -24,6 +25,7 @@ public class PlayersData{
         data.cropThresholds.forEach((k, v) -> materialsCounter.put(k, new HashMap<>()));
         data.oreThresholds.forEach((k, v) -> materialsCounter.put(k, new HashMap<>()));
         socialCreditCounter = getSocialCreditMapFromJSON();
+        System.out.println("path to json : " + SOCIAL_CREDITS_JSON_PATH);
         this.startLoop();
     }
 
@@ -34,7 +36,7 @@ public class PlayersData{
     public void saveSocialCredits() {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            mapper.writeValue(new File("socialCreditsMap.json"), this.socialCreditCounter);
+            mapper.writeValue(new File(SOCIAL_CREDITS_JSON_PATH), this.socialCreditCounter);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -44,7 +46,7 @@ public class PlayersData{
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, Integer> map = new HashMap<>();
         try {
-            map = mapper.readValue(new File("socialCreditsMap.json"), HashMap.class);
+            map = mapper.readValue(new File(SOCIAL_CREDITS_JSON_PATH), HashMap.class);
         }catch (Exception e){
             saveSocialCredits();
             e.printStackTrace();

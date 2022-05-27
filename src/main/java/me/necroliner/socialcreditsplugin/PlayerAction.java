@@ -2,6 +2,7 @@ package me.necroliner.socialcreditsplugin;
 
 
 import me.necroliner.socialcreditsplugin.data.Datasets;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,7 +15,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.TimeSkipEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import java.util.*;
@@ -178,6 +182,17 @@ public class PlayerAction implements Listener {
                 Player player = (Player) creeper.getTarget();
                 playersData.removeSocialCredit(player, 10);
             }
+        }
+    }
+    //unsure if this will work with lag/lots of players
+    @EventHandler
+    public void onSleep(TimeSkipEvent event){
+        if(event.getSkipReason() == TimeSkipEvent.SkipReason.NIGHT_SKIP){
+            Bukkit.getOnlinePlayers().forEach(k -> {
+                if (k.isSleeping()) {
+                    playersData.addSocialCredit(k, 1);
+                }
+            });
         }
     }
 }
